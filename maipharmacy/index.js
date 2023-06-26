@@ -94,7 +94,7 @@ app.post('/login', async (req, res) => {
   app.get('/distance', async (req, res) => {
     const { address } = req.query;
     try {
-      const response = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=Jabi+Lake+Mall+Abuja+Nigeria&destinations=${encodeURIComponent(address)}&key=AIzaSyDgJuOfGh6ySlwdg1TssD3lGnrDSgeVPqE`);
+      const response = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=Jabi+Lake+Mall+Abuja+Nigeria&destinations=${encodeURIComponent(address)}&key=SECRET_KEY_HERE`);
       const data = response.data;
       if (data.rows[0].elements[0].status === 'OK') {
         const distanceInMeters = data.rows[0].elements[0].distance.value;
