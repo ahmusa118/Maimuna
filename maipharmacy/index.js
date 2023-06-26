@@ -118,6 +118,21 @@ app.get('/admin',async(req,res)=>{
   }
   catch(e){res.status(500).json(e)}
 })
+app.get('/data/:id', async (req, res) => {
+  try {
+    // Retrieve the _id from the request parameters
+    const { id } = req.params;
+
+    // Fetch the data based on the provided _id
+    const data = await Medicine.findById(id);
+
+    // Return the data as a response
+    res.json(data);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
 
   app.get('/dashboard', authenticateToken, async (req, res) => {
     const userId = req.userId;
@@ -271,7 +286,7 @@ app.get('/ordercount/:email', async (req, res) => {
 })
 app.post('/order', async (req, res) => {
   try {
-    const { medname, category, subcategory, amount, email, customeraddress, quantity, orderNumber, phoneNumber } = req.body;
+    const { medname, category, subcategory, amount, email, customeraddress, quantity, orderNumber, phoneNumber,price } = req.body;
 
     // Search for existing orders with the given medname and unpaid status
     const existingOrder = await Orders.findOne({ medname, customeremail: email, paid: 'No' });
@@ -302,7 +317,8 @@ app.post('/order', async (req, res) => {
         address: customeraddress,
         quantity,
         orderNumber,
-        phoneNumber
+        phoneNumber,
+        price
       });
 
       // Check the Medicine record for available stock

@@ -30,6 +30,7 @@ const Details = () => {
     const [orderNumber,setOrderNumber]=useState('')
     const [phoneNumber,setPhoneNumber]=useState('')
     const [stock,setStock]=useState(0)
+  
     const updateData = (updatedData) => {
         setData(updatedData);
 
@@ -41,42 +42,44 @@ const increment=()=>{
 const decrement=()=>{
     setQuantity(quantity-1)
 }
-    const toggleModal = (key) => {
-        const dat=data.filter((i)=>{
-            return i._id===key
-        })
-        setMedname(dat[0]?.name)
-        setCategory(dat[0]?.category)
-        setSubcategory(dat[0]?.subcategory)
-        setPrice(dat[0]?.price)
-       setPhoneNumber(location.state.phoneNumber)
-       setStock(data[0].stock)
-        setEmail(location.state.email)
-        setCustomeraddress(location.state.address)
-        setOrderNumber(numPart.toString() + charPart)
-                setModal(!modal);
-              }
+const toggleModal = (key, stock, medname, subcategory, price, category) => {
+    setMedname(medname);
+    setCategory(category);
+    setSubcategory(subcategory);
+    setPrice(price);
+    setPhoneNumber(location.state.phoneNumber);
+    setStock(stock);
+    setEmail(location.state.email);
+    setCustomeraddress(location.state.address);
+    setOrderNumber(numPart.toString() + charPart);
+    setModal(!modal);
+  };
+  
+  const MyModal = ({ children, visible, onCancel, onClose }) => {
+    return (
+        <Modal
+            title="Product Details"
+            visible={visible}
+            onCancel={onCancel}
+            footer={[
+                <Button key="back" onClick={onCancel}>
+                  Return
+                </Button>,
+                <Button key="submit" type="primary" onClick={onClose}>
+                  Add to Cart
+                </Button>,
+            ]}
+        >
+            {children}
+        </Modal>
+)
+  
+  };
+  
               useEffect(() => {
                 setAmount((price * quantity));
             }, [quantity, price])
-            const MyModal = ({ children, visible, onCancel, onClose }) => {
-                return (
-                    <Modal
-                        title="Product Details"
-                        visible={visible}
-                        onCancel={onCancel}
-                        footer={[
-                            <Button key="back" onClick={onCancel}>
-                              Return
-                            </Button>,
-                            <Button key="submit" type="primary" onClick={onClose}>
-                              Add to Cart
-                            </Button>,
-                        ]}
-                    >
-                        {children}
-                    </Modal>
-            )}
+            
      
     const sub=(key)=>{
         const updatedData = data.map((item) => {
@@ -104,14 +107,19 @@ const decrement=()=>{
               customeraddress,
               quantity,
               orderNumber,
-              phoneNumber
+              phoneNumber,
+              price
             }),
           });
-      
+  
           const data = await response.json();
-          setModal(!modal)
-          message.success('success')
-          setCounter(counter+1)
+if(data.error){
+         message.error(data.error)
+          
+          }
+          else{
+            message.success('success')
+            setCounter(counter+1)}
         } catch (error) {
           console.error('Error:', error);
         }
@@ -130,11 +138,25 @@ const decrement=()=>{
    const cart=()=>{
     navigate('/cart',{ state: { email: location.state.email, deliveryprice:totalAmount } })
    }
-    useEffect(() => {
-        if (Array.isArray(location.state.detail)) {
-            setData(location.state.detail);
+   useEffect(() => {
+    if (Array.isArray(location.state.detail)) {
+      const fetchData = async () => {
+        try {
+          const response = await Promise.all(
+            location.state.detail.map((item) =>
+              fetch(`http://localhost:4000/data/${item._id}`).then((res) => res.json())
+            )
+          );
+          setData(response);
+        } catch (error) {
+          console.error('Error:', error);
         }
-    }, [location.state]);
+      };
+  
+      fetchData();
+    }
+  }, [location.state]);
+  
   // Set this to your actual price
     const address = location.state.address;  // Set this to your actual address
     const [totalAmount, setTotalAmount] = useState(0);
@@ -171,7 +193,7 @@ const decrement=()=>{
             <Paragraph>Stock: {stock}</Paragraph>
             <Paragraph><strong>Total: {amount}</strong></Paragraph>
             {quantity > 0 && <Button icon={<MinusOutlined />} onClick={decrement} />}
-            {data[0]?.stock > quantity && <Button icon={<PlusOutlined />} onClick={increment} />}
+            {stock > quantity && <Button icon={<PlusOutlined />} onClick={increment} />}
         </MyModal>
         {Array.isArray(data) && data.map((i) => {
             return (
@@ -183,11 +205,12 @@ const decrement=()=>{
                     <div className="item-text">
                         <Text>{i.name}</Text>
                         <Text>{i.price}</Text>
+                       
                         <div className="item-buttons">
                             {i.page > 0 && <Button icon={<MinusOutlined />} onClick={() => sub(i._id)} />}
                             {i.page < 4 && <Button icon={<PlusOutlined />} onClick={() => add(i._id)} />}
                         </div>
-                        <Button type="primary" onClick={() => toggleModal(i._id)}>Buy</Button>
+                        <Button type="primary" onClick={() => toggleModal(i._id,i.stock,i.name,i.subcategory,i.price,i.category)}>Buy</Button>
                     </div>
                 </div>
             )

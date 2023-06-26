@@ -60,7 +60,7 @@ const Cart = () => {
     }, [location.state.email])
 
     useEffect(() => {
-        const x = dat.reduce((sum, i) => sum + i.amount, 0) + location.state.deliveryprice
+        const x = dat.reduce((sum, i) => sum + (i.quantity*i.price), 0) + location.state.deliveryprice
         setTotal(x)
     }, [dat, location.state.deliveryprice])
 
@@ -91,7 +91,7 @@ const Cart = () => {
                                     title={item.medname}
                                     description={`Quantity: ${item.quantity}`}
                                 />
-                                <div>Price: ₦{item.amount}</div>
+                                <div>Price: ₦{item.price}</div>
                             </List.Item>
                         )}
                     />

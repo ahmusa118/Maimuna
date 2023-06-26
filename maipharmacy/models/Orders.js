@@ -30,6 +30,11 @@ amount:{
     type: Number,
     
 },
+price:{
+    type: Number,
+    required:true
+     
+},
 paid:{
     type: String,
     default:'No'
